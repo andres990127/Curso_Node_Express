@@ -4,6 +4,12 @@ const faker = require('faker');
 // Importamos boom para el manejo de errores
 const boom = require('@hapi/boom');
 
+// Importamos modulo para conexión a postgres por pool
+const pool = require('../libs/postgres.pool');
+
+// Importamos modulo para conexión a postgres por sequelize
+const sequelize = require('../libs/sequelize');
+
 // Se crea una clase para producto la cual genera 100 al ser instanciada
 class ProductsService {
 
@@ -11,6 +17,8 @@ class ProductsService {
   constructor(){
     this.products = [];
     this.generate();
+    this.pool = pool;
+    this.pool.on('error', (err) => console.error(err));
   }
 
   // Función para generar un Json con el modulo faker simulando un producto 100 veces
@@ -37,13 +45,11 @@ class ProductsService {
     return newProduct;
   }
 
-  // Función para encontrar un producto en el array creado anteriormente, tiene 3 segundos de delay
-  find() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(this.products);
-      }, 3000);
-    })
+  // Función para consultar todos los productos
+  async find() {
+    const query = 'SELECT * FROM tasks';
+    const [data] = await sequelize.query(query);
+    return data;
   }
 
   // Función para buscar un producto por su ID

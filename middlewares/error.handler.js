@@ -1,4 +1,6 @@
-// Muddleware para gestión de errores
+// Middleware para gestión de errores
+
+const{ValidationError}=require('sequelize');
 
 // Middleware para mostrar en un log el error
 function logErrors (err, req, res, next) {
@@ -23,5 +25,16 @@ function errorHandler(err, req, res, next) {
   });
 }
 
+function ormErrorHandler(err, req, res, next) {
+  if (err instanceof ValidationError) {
+    res.status(409).json({
+      statusCode: 409,
+      message: err.name,
+      errors: err.errors
+    });
+  }
+  next(err);
+}
 
-module.exports = { logErrors, errorHandler, boomErrorHandler }
+
+module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler}

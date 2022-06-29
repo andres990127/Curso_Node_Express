@@ -8,7 +8,7 @@ const cors = require('cors');
 const routerApi = require('./routes');
 
 // Importamos los manejadores de errores de nuestra aplicación
-const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler');
+const { logErrors, errorHandler, boomErrorHandler, ormErrorHandler } = require('./middlewares/error.handler');
 
 // Instanciamos nuestro servidor Web
 const app = express();
@@ -51,6 +51,7 @@ routerApi(app);
 
 // Middlewares para manejo de errores
 app.use(logErrors);
+app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 
