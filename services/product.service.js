@@ -8,7 +8,7 @@ const boom = require('@hapi/boom');
 const pool = require('../libs/postgres.pool');
 
 // Importamos modulo para conexión a postgres por sequelize
-const sequelize = require('../libs/sequelize');
+const { models } = require('../libs/sequelize');
 
 // Se crea una clase para producto la cual genera 100 al ser instanciada
 class ProductsService {
@@ -37,24 +37,21 @@ class ProductsService {
 
   // Función para crear un nuevo producto
   async create(data) {
-    const newProduct = {
-      id: faker.datatype.uuid(),
-      ...data
-    }
-    this.products.push(newProduct);
+    const newProduct = await models.Product.create(data);
     return newProduct;
   }
 
-  // Función para consultar todos los productos
+  // Función para consultar todos los productos y la categoria a la que esta asociada
   async find() {
-    const query = 'SELECT * FROM tasks';
-    const [data] = await sequelize.query(query);
-    return data;
+    const products = await models.Product.findAll({
+      include: ['category']
+    });
+    return products;
   }
 
   // Función para buscar un producto por su ID
   async findOne(id) {
-    const product = this.products.find(item => item.id === id);
+    const product = models.product.findOne(item => item.id === id);
     if (!product) {
       throw boom.notFound('product not found');
     }
@@ -87,6 +84,7 @@ class ProductsService {
     this.products.splice(index, 1);
     return { id };
   }
+
 }
 
 // Se exporta la clase ProductService que tiene las funciones para la gestión de los productos
