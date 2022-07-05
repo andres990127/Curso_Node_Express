@@ -1,6 +1,9 @@
 // Importamos faker para crear data falsa
 const faker = require('faker');
 
+// Importamos sequelize para obtener operadores lógicos de consulta SQL
+const { Op } = require('sequelize')
+
 // Importamos boom para el manejo de errores
 const boom = require('@hapi/boom');
 
@@ -42,12 +45,31 @@ class ProductsService {
   }
 
   // Función para consultar todos los productos y la categoria a la que esta asociada
-  async find() {
-    const products = await models.Product.findAll({
-      include: ['category']
-    });
+  async find(query) {
+    const options = {
+      include: ['category'],
+      where: {}
+    }
+    const { limit, offset } = query;
+    if (limit && offset) {
+      options.limit =  limit;
+      options.offset =  offset;
+    }
+    const { price } = query;
+    if(price){
+      options.where.price = price;
+    }
+    const { price_min, price_max } = query;
+    if(price_min && price_max){
+      options.where.price = {
+        [Op.gte]: price_min,
+        [Op.lte]: price_max,
+      };
+    }
+    const products = await models.Product.findAll(options);
     return products;
   }
+
 
   // Función para buscar un producto por su ID
   async findOne(id) {
